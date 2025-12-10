@@ -30,8 +30,11 @@ public class CouponService {
     public CouponResponseDto createCoupon(CouponRequestDto request) {
         validateExpirationDate(request.getExpirationDate());
 
+        String couponCode = normalizeCode(request.getCode());
+        validateCode(couponCode);
+
         var coupon = mapper.toEntity(request);
-        coupon.setCode(normalizeCode(request.getCode()));
+        coupon.setCode(couponCode);
         coupon.setPublished(request.getPublished() != null
                 && request.getPublished());
         coupon.setRedeemed(false);
@@ -87,5 +90,12 @@ public class CouponService {
             throw new BusinessException("Code must be exactly 6 alphanumeric characters");
         }
         return normalized.toUpperCase();
+    }
+
+    private void validateCode(String code) {
+        var coupon = repository.findByCode(code);
+        if (coupon.isPresent()) {
+            throw new BusinessException("Coupon code already exists or have existed");
+        }
     }
 }

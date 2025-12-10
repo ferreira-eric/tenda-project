@@ -76,10 +76,21 @@ class CouponServiceTest {
         when(request.getExpirationDate()).thenReturn(OffsetDateTime.now().plusDays(1));
         when(request.getCode()).thenReturn("abc");
 
-        when(mapper.toEntity(request)).thenReturn(new Coupon());
+        assertThrows(BusinessException.class, () -> service.createCoupon(request));
+        verify(mapper, never()).toEntity(request);
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void createCouponWhenCodeAlreadyExistThrowsBusinessException() {
+        var request = mock(CouponRequestDto.class);
+        when(request.getExpirationDate()).thenReturn(OffsetDateTime.now().plusDays(1));
+        when(request.getCode()).thenReturn("abc123");
+
+        when(repository.findByCode("ABC123")).thenReturn(Optional.of(mock(Coupon.class)));
 
         assertThrows(BusinessException.class, () -> service.createCoupon(request));
-        verify(mapper).toEntity(request);
+        verify(mapper, never()).toEntity(request);
         verify(repository, never()).save(any());
     }
 

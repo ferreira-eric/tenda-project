@@ -1,0 +1,2 @@
+ALTER TABLE coupons
+DROP CONSTRAINT IF EXISTS coupons_code_key;
